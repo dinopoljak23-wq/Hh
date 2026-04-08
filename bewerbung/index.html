@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0A0A1A">
+    <title>BewerbungsPro - Bewerbungsmanager</title>
+    <link rel="stylesheet" href="bewerbung.css">
+</head>
+<body>
+    <div id="app">
+
+        <!-- Step Indicator -->
+        <div class="steps-bar">
+            <div class="step active" data-step="1"><span class="step-num">1</span><span class="step-label">Vorlage</span></div>
+            <div class="step-line"></div>
+            <div class="step" data-step="2"><span class="step-num">2</span><span class="step-label">Daten</span></div>
+            <div class="step-line"></div>
+            <div class="step" data-step="3"><span class="step-num">3</span><span class="step-label">Vorschau</span></div>
+        </div>
+
+        <!-- ==================== STEP 1: Upload ==================== -->
+        <div id="step-1" class="step-content active">
+            <div class="section-header">
+                <h1>Vorlage hochladen</h1>
+                <p>Lade deine Word-Bewerbungsvorlage hoch (.docx)</p>
+            </div>
+
+            <div id="upload-area" class="upload-area" onclick="document.getElementById('file-input').click()">
+                <input type="file" id="file-input" accept=".docx" onchange="handleFileUpload(event)" hidden>
+                <div class="upload-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <p class="upload-title">Tippe hier zum Hochladen</p>
+                <p class="upload-sub">.docx Datei auswählen</p>
+            </div>
+
+            <div id="file-info" class="file-info hidden">
+                <div class="file-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
+                </div>
+                <div class="file-details">
+                    <p id="file-name" class="file-name">dokument.docx</p>
+                    <p id="file-size" class="file-size">125 KB</p>
+                </div>
+                <button class="file-remove" onclick="removeFile()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div id="found-placeholders" class="placeholder-info hidden">
+                <h3>Gefundene Platzhalter:</h3>
+                <div id="placeholder-tags" class="tag-list"></div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                </div>
+                <div class="info-text">
+                    <p><strong>So funktioniert's:</strong></p>
+                    <p>Schreibe in deine Word-Vorlage Platzhalter in geschweiften Klammern, z.B.:</p>
+                    <div class="placeholder-examples">
+                        <code>{firma}</code> <code>{ansprechpartner}</code> <code>{strasse}</code>
+                        <code>{plz}</code> <code>{ort}</code> <code>{anrede}</code>
+                        <code>{position}</code> <code>{datum}</code>
+                    </div>
+                    <p>Diese werden dann automatisch mit deinen Eingaben ersetzt!</p>
+                </div>
+            </div>
+
+            <div class="or-divider">
+                <span>oder</span>
+            </div>
+
+            <button class="secondary-btn" onclick="useDefaultTemplate()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Standard-Vorlage verwenden
+            </button>
+
+            <button id="next-1" class="primary-btn" onclick="goToStep(2)">
+                Weiter
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+            </button>
+        </div>
+
+        <!-- ==================== STEP 2: Form ==================== -->
+        <div id="step-2" class="step-content">
+            <div class="section-header">
+                <h1>Bewerbungsdaten</h1>
+                <p>Fülle die Felder aus - sie werden automatisch eingesetzt</p>
+            </div>
+
+            <div class="form-scroll">
+                <!-- Firma -->
+                <div class="form-group">
+                    <div class="group-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+                        <h2>Unternehmen</h2>
+                    </div>
+                    <div class="field">
+                        <label for="firma">Firmenname *</label>
+                        <input type="text" id="firma" placeholder="z.B. BMW AG" oninput="updatePreview()">
+                    </div>
+                    <div class="field">
+                        <label for="abteilung">Abteilung</label>
+                        <input type="text" id="abteilung" placeholder="z.B. Personalabteilung" oninput="updatePreview()">
+                    </div>
+                    <div class="field">
+                        <label for="strasse">Straße & Hausnr.</label>
+                        <input type="text" id="strasse" placeholder="z.B. Musterstraße 123" oninput="updatePreview()">
+                    </div>
+                    <div class="field-row">
+                        <div class="field small">
+                            <label for="plz">PLZ</label>
+                            <input type="text" id="plz" placeholder="80331" maxlength="5" oninput="updatePreview()">
+                        </div>
+                        <div class="field">
+                            <label for="ort">Ort</label>
+                            <input type="text" id="ort" placeholder="München" oninput="updatePreview()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ansprechpartner -->
+                <div class="form-group">
+                    <div class="group-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <h2>Ansprechpartner</h2>
+                    </div>
+                    <div class="gender-toggle">
+                        <button class="gender-btn active" data-gender="herr" onclick="selectGender('herr')">Herr</button>
+                        <button class="gender-btn" data-gender="frau" onclick="selectGender('frau')">Frau</button>
+                        <button class="gender-btn" data-gender="none" onclick="selectGender('none')">Unbekannt</button>
+                    </div>
+                    <div id="name-fields">
+                        <div class="field">
+                            <label for="titel">Titel (optional)</label>
+                            <input type="text" id="titel" placeholder="z.B. Dr., Prof." oninput="updatePreview()">
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label for="vorname_ap">Vorname</label>
+                                <input type="text" id="vorname_ap" placeholder="Max" oninput="updatePreview()">
+                            </div>
+                            <div class="field">
+                                <label for="nachname_ap">Nachname *</label>
+                                <input type="text" id="nachname_ap" placeholder="Müller" oninput="updatePreview()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="anrede-preview">
+                        <span class="anrede-label">Anrede wird:</span>
+                        <span id="anrede-result" class="anrede-value">Sehr geehrter Herr Müller,</span>
+                    </div>
+                </div>
+
+                <!-- Stelle -->
+                <div class="form-group">
+                    <div class="group-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4z"/></svg>
+                        <h2>Stelle</h2>
+                    </div>
+                    <div class="field">
+                        <label for="position">Stellenbezeichnung *</label>
+                        <input type="text" id="position" placeholder="z.B. Softwareentwickler" oninput="updatePreview()">
+                    </div>
+                    <div class="field">
+                        <label for="referenz">Referenznummer</label>
+                        <input type="text" id="referenz" placeholder="z.B. REF-2024-001" oninput="updatePreview()">
+                    </div>
+                    <div class="field">
+                        <label for="datum">Datum</label>
+                        <input type="date" id="datum" oninput="updatePreview()">
+                    </div>
+                    <div class="field">
+                        <label for="quelle">Gefunden über</label>
+                        <input type="text" id="quelle" placeholder="z.B. StepStone, LinkedIn" oninput="updatePreview()">
+                    </div>
+                </div>
+
+                <!-- Eigene Daten -->
+                <div class="form-group">
+                    <div class="group-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                        <h2>Deine Daten</h2>
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="vorname">Dein Vorname</label>
+                            <input type="text" id="vorname" placeholder="Dein Vorname" oninput="updatePreview()">
+                        </div>
+                        <div class="field">
+                            <label for="nachname">Dein Nachname</label>
+                            <input type="text" id="nachname" placeholder="Dein Nachname" oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="meine_strasse">Deine Straße</label>
+                        <input type="text" id="meine_strasse" placeholder="Musterweg 1" oninput="updatePreview()">
+                    </div>
+                    <div class="field-row">
+                        <div class="field small">
+                            <label for="meine_plz">PLZ</label>
+                            <input type="text" id="meine_plz" placeholder="10115" maxlength="5" oninput="updatePreview()">
+                        </div>
+                        <div class="field">
+                            <label for="mein_ort">Ort</label>
+                            <input type="text" id="mein_ort" placeholder="Berlin" oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="email">E-Mail</label>
+                        <input type="email" id="email" placeholder="deine@email.de" oninput="updatePreview()">
+                    </div>
+                    <div class="field">
+                        <label for="telefon">Telefon</label>
+                        <input type="tel" id="telefon" placeholder="+49 170 1234567" oninput="updatePreview()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button class="back-btn" onclick="goToStep(1)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>
+                    Zurück
+                </button>
+                <button class="primary-btn" onclick="goToStep(3)">
+                    Vorschau
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== STEP 3: Preview & Export ==================== -->
+        <div id="step-3" class="step-content">
+            <div class="section-header">
+                <h1>Vorschau & Export</h1>
+                <p>Prüfe deine Bewerbung und lade sie als PDF herunter</p>
+            </div>
+
+            <div id="preview-container" class="preview-container">
+                <div id="preview-page" class="preview-page"></div>
+            </div>
+
+            <div class="export-buttons">
+                <button class="primary-btn export-btn" onclick="exportPDF()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Als PDF herunterladen
+                </button>
+                <button class="secondary-btn" onclick="exportWord()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Als Word herunterladen
+                </button>
+            </div>
+
+            <div class="btn-row">
+                <button class="back-btn" onclick="goToStep(2)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>
+                    Zurück bearbeiten
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="bewerbung.js"></script>
+</body>
+</html>
